@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: dtcloud-auth-center
+server:
+  port: 8681
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8661/eureka/
+  instance:
+    prefer-ip-address: true
+    healthcheck:
+      enabled: true

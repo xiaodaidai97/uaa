@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hawker.mapper.ResourcesMapper">
+  <!--<resultMap id="BaseResultMap" type="com.study.model.Resources">-->
+    <!--&lt;!&ndash;-->
+      <!--WARNING - @mbg.generated-->
+    <!--&ndash;&gt;-->
+    <!--<id column="id" jdbcType="INTEGER" property="id" />-->
+    <!--<result column="name" jdbcType="VARCHAR" property="name" />-->
+    <!--<result column="resUrl" jdbcType="VARCHAR" property="resurl" />-->
+    <!--<result column="type" jdbcType="INTEGER" property="type" />-->
+    <!--<result column="parentId" jdbcType="INTEGER" property="parentid" />-->
+    <!--<result column="sort" jdbcType="INTEGER" property="sort" />-->
+  <!--</resultMap>-->
+
+  <select id="queryAll" resultType="com.hawker.model.Resources">
+      	SELECT id,code,name,parentId,resUrl,type,sort,status,full_path,sys_id,remark,ext_info
+		FROM resources
+		ORDER BY sort ASC
+  </select>
+
+    <select id="loadUserResources" parameterType="java.util.HashMap" resultType="com.hawker.model.Resources">
+        SELECT re.id,re.name,re.parentId,re.resUrl
+        FROM resources re LEFT JOIN role_resources rr
+        ON re.id = rr.resources_id
+        LEFT JOIN user_role ur
+        ON rr.role_id =ur.role_id
+        WHERE ur.user_id=#{userid}
+        <if test="type != null">
+            AND re.type= #{type}
+        </if>
+        GROUP BY re.id
+        ORDER BY re.sort ASC
+    </select>
+
+    <select id="queryResourcesListWithSelected" parameterType="int" resultType="com.hawker.model.Resources">
+        SELECT re.id,re.name,re.parentId,re.resUrl,re.type,
+		(CASE WHEN EXISTS(SELECT 1
+		FROM role_resources rr WHERE rr.resources_id=re.id AND rr.role_id=#{rid})
+		THEN 'true' ELSE 'false' END) AS checked
+		FROM resources re
+		WHERE re.parentId !=0
+		ORDER BY re.sort ASC
+    </select>
+</mapper>

@@ -1,0 +1,110 @@
+<!--top-Header-menu-->
+<div  th:fragment="top">
+<div id="user-nav" class="navbar navbar-inverse" >
+    <ul class="nav">
+        <li>
+            <a href="#" ><i class="icon-user"></i>选择系统</a>
+        </li>
+        <li class="dropdown" id="sys-messages">
+            <a href="#" id="rbacsys-link" data-toggle="dropdown" data-target="#menu-messages" class="dropdown-toggle">
+                <i class="icon icon-envelope"></i>
+                <span class="text">切换系统</span>
+            <span id="rbacsys-name" class="label label-important">未选择系统</span> <b class="caret"></b></a>
+        </li>
+        <li class="dropdown" id="menu-messages"><a href="#" data-toggle="dropdown" data-target="#menu-messages" class="dropdown-toggle"><i class="icon icon-envelope"></i> <span class="text">Messages</span> <span class="label label-important">5</span> <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li><a class="sAdd" title="" href="#"><i class="icon-plus"></i> new message</a></li>
+                <li class="divider"></li>
+                <li><a class="sInbox" title="" href="#"><i class="icon-envelope"></i> inbox</a></li>
+                <li class="divider"></li>
+                <li><a class="sOutbox" title="" href="#"><i class="icon-arrow-up"></i> outbox</a></li>
+                <li class="divider"></li>
+                <li><a class="sTrash" title="" href="#"><i class="icon-trash"></i> trash</a></li>
+            </ul>
+        </li>
+        <li class=""><a title="" href="#"><i class="icon icon-cog"></i> <span class="text">Settings</span></a></li>
+        <li class=""><a href="/logout" onclick="localStorage.clear();"><i class="icon icon-share-alt"></i> <span class="text">Logout</span></a></li>
+    </ul>
+</div>
+<!--start-top-serch-->
+<div id="search">
+    <input type="text" placeholder="Search here..."/>
+    <button type="submit" class="tip-bottom" title="Search"><i class="icon-search icon-white"></i></button>
+</div>
+<!--close-top-serch-->
+<!--sidebar-menu-->
+
+<!--添加弹框-->
+<div class="modal fade" id="rbacsysSelectModal" tabindex="-1" role="dialog" aria-labelledby="addroleLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="selectsysLabel">选择系统</h4>
+            </div>
+            <div class="modal-body">
+                <form id="rbacsysForm">
+                    <div class="form-group">
+                        <select id="sys-list-top"  class="form-control">
+                            <option value='' disabled selected style='display:none;'>请选择系统</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="selectSys();" class="btn btn-primary">选择</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/添加弹框-->
+<script th:src="@{/js/jquery-1.11.2.min.js}"></script>
+<script type="text/javascript">
+    var sysName = localStorage.getItem('sysName')
+    $("#rbacsys-name").text(sysName)
+    var sysId = localStorage.getItem('sysId')
+    if(sysId == "" || sysId == undefined || sysId == null){
+        localStorage.setItem("sysId",0);
+    }
+
+    //选择系统按钮
+    $("#rbacsys-link").click(function(){
+        $('#rbacsysSelectModal').modal();
+    });
+
+    //选择系统，存储到localstorage
+    function selectSys() {
+        var sysId = $("#sys-list-top").val();
+        var sysName = $("#sys-list-top option:selected").text()
+        $("#rbacsys-name").text(sysName);
+        localStorage.setItem("sysId",sysId);
+        localStorage.setItem("sysName", sysName)
+        $('#rbacsysSelectModal').modal('hide');
+        table.ajax.reload();
+    }
+
+    //
+    $("#sys-list-top").click(function(){
+        var mysys={};
+        mysys.userId=localStorage.getItem("userId");
+        $("#sys-list-top").empty();
+        $.ajax({
+            type:"get",
+            dataType:"json",
+            contentType:"application/json;charset=utf-8",
+            url:"rbacsys",
+            data: mysys,
+            success:function(result){
+                $.each(result.data,function(index,value){
+                    $("#sys-list-top").append("<option value='"+value.id+"'>"+value.name+"</option>");
+                })
+            },
+            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                alert(errorThrown);
+            },
+            async:false             //false表示同步
+        });
+    });
+    
+</script>
+</div>
